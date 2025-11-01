@@ -1,0 +1,177 @@
+@charset "UTF-8";
+
+/* === 基本設定 === */
+:root {
+    --bg-color: #f5f7fa;
+    --text-color: #333;
+    --muted-text-color: #666;
+    --primary-color: #4a90e2;
+    --border-color: #e0e0e0;
+    --card-bg: #fff;
+    --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    
+    --correct-bg: #e8f5e9;
+    --correct-color: #2e7d32;
+    --incorrect-bg: #ffebee;
+    --incorrect-color: #c62828;
+
+    --header-bg: #fff;
+}
+
+/* === ダークモード設定 === */
+body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --muted-text-color: #aaa;
+    --border-color: #333;
+    --card-bg: #1e1e1e;
+    --card-shadow: 0 2px 10px rgba(0,0,0,0.2);
+
+    --correct-bg: #1a331c;
+    --incorrect-bg: #3c1e1e;
+    
+    --header-bg: #1e1e1e;
+}
+
+/* === 基本スタイル === */
+body {
+    font-family: 'Helvetica Neue', Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+header {
+    max-width: 800px;
+    margin: 0 auto 2rem auto;
+    padding: 10px 20px;
+    background-color: var(--header-bg);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+h1, h2, h3 { color: var(--text-color); }
+button { /* ... (前回のコードから変更なし) ... */ }
+/* ... (以下、前回同様のボタン等のスタイルが続く) ... */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+button:hover { opacity: 0.9; }
+button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+/* === ダークモードスイッチ === */
+.theme-switch-wrapper { display: flex; align-items: center; }
+.theme-switch { display: inline-block; height: 24px; position: relative; width: 48px; }
+.theme-switch input { display:none; }
+.slider { background-color: #ccc; bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0; transition: .4s; border-radius: 24px; }
+.slider:before { background-color: #fff; bottom: 4px; content: ""; height: 16px; left: 4px; position: absolute; transition: .4s; width: 16px; border-radius: 50%; }
+input:checked + .slider { background-color: var(--primary-color); }
+input:checked + .slider:before { transform: translateX(24px); }
+
+
+/* === 各画面コンテナ === */
+.screen { display: none; } /* 基本は非表示 */
+.screen.active { display: block; } /* 表示する画面に付けるクラス */
+
+
+/* === クイズ一覧画面 === */
+.quiz-category h3 {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 5px;
+    margin-top: 2rem;
+}
+.quiz-card {
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.quiz-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.quiz-card h4 { margin: 0 0 10px 0; font-size: 1.2rem; }
+.quiz-meta { display: flex; gap: 20px; color: var(--muted-text-color); font-size: 0.9rem; }
+
+
+/* === 開始・結果画面の共通スタイル === */
+.center-content { text-align: center; }
+.center-content h2 { font-size: 1.8rem; }
+.center-content p { font-size: 1.1rem; margin-bottom: 2rem; }
+.action-buttons { margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; }
+
+
+/* === クイズプレイ画面 === */
+#question-counter { color: var(--muted-text-color); font-size: 0.9rem; }
+#question-statement { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; }
+.option-card { /* ... (前回のコードから変更なし) ... */ }
+.option-card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; position: relative; }
+.option-card:hover { border-color: var(--primary-color); }
+.option-card.selected { border-color: var(--primary-color); background-color: rgba(74, 144, 226, 0.1); }
+.option-card input[type="radio"] { position: absolute; opacity: 0; cursor: pointer; }
+.option-label { font-weight: bold; margin-right: 10px; color: var(--muted-text-color); }
+.option-card.correct { background-color: var(--correct-bg); border-color: var(--correct-color); }
+.option-card.incorrect { background-color: var(--incorrect-bg); border-color: var(--incorrect-color); }
+.feedback-content { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.95rem; animation: fadeIn 0.3s ease-in; }
+.feedback-icon { font-weight: bold; margin-right: 5px; }
+.correct .feedback-icon { color: var(--correct-color); }
+.incorrect .feedback-icon { color: var(--incorrect-color); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+#action-button-container { margin-top: 2rem; text-align: right; }
+#submit-answer-btn { min-width: 150px; }
+/* ヒント機能 */
+.hint-container {
+    margin: 1.5rem 0;
+}
+.hint-toggle {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.hint-content {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 4px;
+    display: none; /* 初期状態は非表示 */
+}
+
+/* 結果画面 */
+#result-summary { font-size: 1.5rem; font-weight: bold; }
+#result-message { font-size: 1.2rem; margin-top: 1rem; color: var(--primary-color); }
+
+
+/* レスポンシブ対応（スマホ向け調整） */
+@media (max-width: 600px) {
+    body { padding: 10px; }
+    main { padding: 15px; }
+    #question-statement { font-size: 1.1rem; }
+    .quiz-meta { flex-direction: column; gap: 5px; }
+    .action-buttons { flex-direction: column; }
+    .action-buttons button { width: 100%; }
+}
