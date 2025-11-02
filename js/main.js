@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedOptionIndex = null;
 
     // === HTML要素取得 ===
+    const loadErrorsContainer = document.getElementById('load-errors-container');
     const quizListContainer = document.getElementById('quiz-list');
     const screens = document.querySelectorAll('.screen');
     const themeSwitch = document.getElementById('theme-switch-checkbox');
-
-    // クイズプレイ画面要素
+    // ... (以下、他の要素取得は変更なし)
     const quizTitleEl = document.getElementById('quiz-title');
     const questionCounterEl = document.getElementById('question-counter');
     const questionStatementEl = document.getElementById('question-statement');
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitAnswerBtn = document.getElementById('submit-answer-btn');
 
     // === イベントリスナー設定 ===
+    // ... (変更なし)
     submitAnswerBtn.addEventListener('click', handleSubmitAnswer);
     hintToggleBtn.addEventListener('click', () => {
         hintContent.style.display = hintContent.style.display === 'block' ? 'none' : 'block';
@@ -33,44 +34,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === 初期化処理 ===
     initializeTheme();
-    loadAllQuizzes(); // ★★★ ページ読み込み時にクイズを自動で読み込む
+    loadAllQuizzes();
 
     // =============================
     // === 関数定義 ===
     // =============================
 
-    /** 画面を切り替える */
     function showScreen(screenId) {
         screens.forEach(screen => {
             screen.classList.toggle('active', screen.id === screenId);
         });
     }
 
-    /** 全てのクイズデータを自動で読み込む */
+    /** 全てのクイズデータを自動で読み込む（堅牢版） */
     async function loadAllQuizzes() {
         try {
-            // 1. 読み込むべきファイルの一覧を取得
             const listResponse = await fetch('data/quiz_list.json');
-            if (!listResponse.ok) throw new Error('quiz_list.jsonが見つかりません。');
+            if (!listResponse.ok) throw new Error('設定ファイル "quiz_list.json" が見つかりません。');
             const fileList = await listResponse.json();
 
-            // 2. 一覧にあるファイルを並行して全て取得
-            const quizPromises = fileList.map(fileName => 
-                fetch(`data/${fileName}`).then(res => {
-                    if (!res.ok) throw new Error(`${fileName}の読み込みに失敗しました。`);
-                    return res.json();
-                })
+            const quizPromises = fileList.map(fileName =>
+                fetch(`data/${fileName}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error(`ファイルが見つかりません (404 Not Found)`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (!data || !Array.isArray(data.questions)) {
+                            throw new Error(`ファイル形式が不正です ("questions"項目が見つかりません)`);
+                        }
+                        return { data, fileName }; // 成功時にファイル名も一緒に返す
+                    })
+                    .catch(error => {
+                        // 各ファイルごとのエラーを整形
+                        throw new Error(`[${fileName}] ${error.message}`);
+                    })
             );
             
-            allQuizData = await Promise.all(quizPromises);
+            const results = await Promise.allSettled(quizPromises);
+
+            const successfulQuizzes = results
+                .filter(r => r.status === 'fulfilled')
+                .map(r => r.value.data);
+            
+            const failedQuizzes = results
+                .filter(r => r.status === 'rejected')
+                .map(r => r.reason.message);
+            
+            allQuizData = successfulQuizzes;
             displayQuizList();
 
+            if (failedQuizzes.length > 0) {
+                displayLoadErrors(failedQuizzes);
+            }
+
         } catch (error) {
-            console.error('クイズデータの読み込みに失敗しました:', error);
-            quizListContainer.innerHTML = '<p>クイズデータの読み込みに失敗しました。管理者にお問い合わせください。</p>';
+            console.error('クイズデータの読み込み処理で致命的なエラー:', error);
+            displayLoadErrors([`[quiz_list.json] ${error.message}`]);
         }
     }
 
+    /** 読み込みエラーを表示する */
+    function displayLoadErrors(errors) {
+        const errorListHTML = errors.map(msg => `<li>${msg.replace(/</g, "&lt;")}</li>`).join('');
+        loadErrorsContainer.innerHTML = `
+            <div class="load-error-box">
+                <h3>一部のクイズデータが読み込めませんでした</h3>
+                <p>以下のファイルに問題があるため、一覧に表示されていません。サイト管理者にご連絡いただけると助かります。</p>
+                <ul>${errorListHTML}</ul>
+                <p>管理者へ報告する際は、以下のボタンでエラー内容全体をコピーできます。</p>
+                <button id="copy-error-btn">エラー情報をクリップボードにコピー</button>
+            </div>
+        `;
+
+        document.getElementById('copy-error-btn').addEventListener('click', (e) => {
+            const button = e.target;
+            const reportText = `クイズサイトのエラー報告:\n\n${errors.join('\n')}`;
+            navigator.clipboard.writeText(reportText).then(() => {
+                button.textContent = 'コピーしました！';
+                setTimeout(() => {
+                    button.textContent = 'エラー情報をクリップボードにコピー';
+                }, 2000);
+            }).catch(err => {
+                button.textContent = 'コピーに失敗しました';
+                console.error('クリップボードへのコピーに失敗:', err);
+            });
+        });
+    }
+    
     /** クイズ一覧表示処理 */
     function displayQuizList() {
         quizListContainer.innerHTML = '';
@@ -80,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const quizzesByCategory = allQuizData.reduce((acc, quiz) => {
+            // ... (以下、変更なし)
             const category = quiz.category || '未分類';
             if (!acc[category]) acc[category] = [];
             acc[category].push(quiz);
@@ -116,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('start-quiz-description').textContent = currentQuiz.detailedDescription || currentQuiz.description;
         showScreen('start-screen');
     }
+
     /** クイズ開始処理 */
     function startQuiz() {
         currentQuestionIndex = 0;
@@ -191,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 自分が選んだ選択肢が、正解の選択肢のいずれかと一致すればスコア加算
         if (question.options[selectedOptionIndex].isCorrect) {
             score++;
         }
@@ -201,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
             submitAnswerBtn.textContent = '結果を見る';
         }
     }
-
     /** 次の問題へ進む処理 */
     function goToNextQuestion() {
         currentQuestionIndex++;
@@ -211,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showResultScreen();
         }
     }
+
     /** 結果表示処理 */
     function showResultScreen() {
         const total = currentQuiz.questions.length;

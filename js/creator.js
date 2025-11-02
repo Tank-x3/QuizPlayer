@@ -25,10 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addResultMessageBtn.addEventListener('click', addResultMessage);
     quizForm.addEventListener('input', () => { isDirty = true; });
     window.addEventListener('beforeunload', (e) => {
-        if (isDirty) {
-            e.preventDefault();
-            e.returnValue = '';
-        }
+        if (isDirty) { e.preventDefault(); e.returnValue = ''; }
     });
 
     // === 初期化 ===
@@ -39,9 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =============================
 
     function handleNewQuiz() {
-        if (isDirty && !confirm('編集中の内容が破棄されますが、よろしいですか？')) {
-            return;
-        }
+        if (isDirty && !confirm('編集中の内容が破棄されますが、よろしいですか？')) return;
         resetForm();
     }
     
@@ -68,21 +63,16 @@ document.addEventListener('DOMContentLoaded', () => {
             addOption(e.target.previousElementSibling);
         });
         const optionsContainer = questionBlock.querySelector('.options-container');
-        addOption(optionsContainer, true);
-        addOption(optionsContainer);
+        addOption(optionsContainer); // 選択肢1
+        addOption(optionsContainer); // 選択肢2
         questionsContainer.appendChild(clone);
         updateQuestionNumbers();
         isDirty = true;
     }
 
-    function addOption(container, isFirst = false) {
+    function addOption(container) {
         const clone = optionTemplate.content.cloneNode(true);
         const optionBlock = clone.querySelector('.option-block');
-        const radio = optionBlock.querySelector('.correct-option-radio');
-        const questionBlock = container.closest('.question-block');
-        const questionIndex = Array.from(questionsContainer.children).indexOf(questionBlock);
-        radio.name = `correct-option-${questionIndex}`;
-        if (isFirst) radio.checked = true;
         optionBlock.querySelector('.delete-option-btn').addEventListener('click', () => {
             optionBlock.remove();
             isDirty = true;
@@ -108,11 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         questionsContainer.querySelectorAll('.question-title').forEach((title, index) => {
             title.textContent = `問題 ${index + 1}`;
         });
-        questionsContainer.querySelectorAll('.correct-option-radio').forEach(radio => {
-            const questionBlock = radio.closest('.question-block');
-            const questionIndex = Array.from(questionsContainer.children).indexOf(questionBlock);
-            radio.name = `correct-option-${questionIndex}`;
-        });
     }
 
     function handleFileLoad(event) {
@@ -122,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
@@ -178,13 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('quiz-description').value = data.description || '';
         document.getElementById('quiz-detailed-description').value = data.detailedDescription || '';
 
-        if (data.resultMessages) {
-            data.resultMessages.forEach(msg => addResultMessage(msg));
-        }
+        if (data.resultMessages) data.resultMessages.forEach(msg => addResultMessage(msg));
 
         if (data.questions) {
-            // === ここからが修正箇所 ===
-            data.questions.forEach((q, questionIndex) => { // questionIndex を取得
+            data.questions.forEach(q => {
                 const clone = questionTemplate.content.cloneNode(true);
                 const questionBlock = clone.querySelector('.question-block');
                 questionBlock.querySelector('.question-statement').value = q.statement || '';
@@ -195,12 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     q.options.forEach(opt => {
                         const optClone = optionTemplate.content.cloneNode(true);
                         const optionBlock = optClone.querySelector('.option-block');
-                        const radio = optionBlock.querySelector('.correct-option-radio');
-                        
-                        // ラジオボタンのname属性をここで設定
-                        radio.name = `correct-option-${questionIndex}`;
-                        
-                        radio.checked = opt.isCorrect || false;
+                        optionBlock.querySelector('.correct-option-checkbox').checked = opt.isCorrect || false;
                         optionBlock.querySelector('.option-text').value = opt.text || '';
                         optionBlock.querySelector('.option-explanation').value = opt.explanation || '';
                         optionBlock.querySelector('.delete-option-btn').addEventListener('click', () => { optionBlock.remove(); isDirty = true; });
@@ -212,14 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 questionBlock.querySelector('.add-option-btn').addEventListener('click', (e) => addOption(e.target.previousElementSibling));
                 questionsContainer.appendChild(clone);
             });
-            // === ここまでが修正箇所 ===
         }
         updateQuestionNumbers();
     }
     
     function handleSave() {
         if (!validateForm()) {
-            alert('入力内容にエラーがあります。赤枠の項目を確認してください。');
+            alert('入力内容にエラーがあります。赤枠の項目を確認してください。\n（各問題に、正解の選択肢が1つ以上設定されている必要があります）');
             return;
         }
         const quizData = buildJsonObject();
@@ -270,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             block.querySelectorAll('.option-block').forEach(optBlock => {
                 question.options.push({
                     text: optBlock.querySelector('.option-text').value,
-                    isCorrect: optBlock.querySelector('.correct-option-radio').checked,
+                    isCorrect: optBlock.querySelector('.correct-option-checkbox').checked,
                     explanation: optBlock.querySelector('.option-explanation').value
                 });
             });
@@ -290,8 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         questionsContainer.querySelectorAll('.question-block').forEach(block => {
-            const checkedRadios = block.querySelectorAll('.correct-option-radio:checked');
-            if (checkedRadios.length !== 1) {
+            const checkedCheckboxes = block.querySelectorAll('.correct-option-checkbox:checked');
+            // 正解が1つも設定されていない場合にエラー
+            if (checkedCheckboxes.length === 0) {
                 block.style.border = '2px solid red';
                 isValid = false;
             } else {

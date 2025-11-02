@@ -66,8 +66,6 @@ main {
 }
 
 h1, h2, h3 { color: var(--text-color); }
-button { /* ... (前回のコードから変更なし) ... */ }
-/* ... (以下、前回同様のボタン等のスタイルが続く) ... */
 button {
     background-color: var(--primary-color);
     color: white;
@@ -125,7 +123,6 @@ input:checked + .slider:before { transform: translateX(24px); }
 /* === クイズプレイ画面 === */
 #question-counter { color: var(--muted-text-color); font-size: 0.9rem; }
 #question-statement { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; }
-.option-card { /* ... (前回のコードから変更なし) ... */ }
 .option-card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; position: relative; }
 .option-card:hover { border-color: var(--primary-color); }
 .option-card.selected { border-color: var(--primary-color); background-color: rgba(74, 144, 226, 0.1); }
@@ -165,6 +162,28 @@ input:checked + .slider:before { transform: translateX(24px); }
 #result-summary { font-size: 1.5rem; font-weight: bold; }
 #result-message { font-size: 1.2rem; margin-top: 1rem; color: var(--primary-color); }
 
+/* === エラー表示ボックス === */
+.load-error-box {
+    border: 2px solid var(--incorrect-color);
+    background-color: var(--incorrect-bg);
+    padding: 15px;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    color: var(--text-color);
+}
+.load-error-box h3 {
+    color: var(--incorrect-color);
+    margin: 0 0 10px 0;
+}
+.load-error-box ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 10px 0;
+}
+.load-error-box button {
+    background-color: var(--muted-text-color);
+    margin-top: 10px;
+}
 
 /* レスポンシブ対応（スマホ向け調整） */
 @media (max-width: 600px) {
