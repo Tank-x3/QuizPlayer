@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizListContainer = document.getElementById('quiz-list');
     const screens = document.querySelectorAll('.screen');
     const themeSwitch = document.getElementById('theme-switch-checkbox');
-    // ... (以下、他の要素取得は変更なし)
     const quizTitleEl = document.getElementById('quiz-title');
     const questionCounterEl = document.getElementById('question-counter');
     const questionStatementEl = document.getElementById('question-statement');
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitAnswerBtn = document.getElementById('submit-answer-btn');
 
     // === イベントリスナー設定 ===
-    // ... (変更なし)
     submitAnswerBtn.addEventListener('click', handleSubmitAnswer);
     hintToggleBtn.addEventListener('click', () => {
         hintContent.style.display = hintContent.style.display === 'block' ? 'none' : 'block';
@@ -32,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('back-to-list-btn').addEventListener('click', () => showScreen('list-screen'));
     themeSwitch.addEventListener('change', toggleTheme);
 
+    // ★★★ 追加したボタンのイベントリスナー ★★★
+    document.getElementById('start-back-to-list-btn').addEventListener('click', () => showScreen('list-screen'));
+    document.getElementById('play-back-to-list-btn').addEventListener('click', () => {
+        if (confirm('現在のクイズを中断して一覧に戻りますか？\n（進行状況は保存されません）')) {
+            showScreen('list-screen');
+        }
+    });
+    // ★★★ ここまで ★★★
+
     // === 初期化処理 ===
     initializeTheme();
     loadAllQuizzes();
@@ -39,14 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // =============================
     // === 関数定義 ===
     // =============================
-
     function showScreen(screenId) {
         screens.forEach(screen => {
             screen.classList.toggle('active', screen.id === screenId);
         });
     }
 
-    /** 全てのクイズデータを自動で読み込む（堅牢版） */
     async function loadAllQuizzes() {
         try {
             const listResponse = await fetch('data/quiz_list.json');
@@ -63,23 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (!data || !Array.isArray(data.questions)) {
                             throw new Error(`ファイル形式が不正です ("questions"項目が見つかりません)`);
                         }
-                        return { data, fileName }; // 成功時にファイル名も一緒に返す
+                        return { data, fileName };
                     })
                     .catch(error => {
-                        // 各ファイルごとのエラーを整形
                         throw new Error(`[${fileName}] ${error.message}`);
                     })
             );
             
             const results = await Promise.allSettled(quizPromises);
-
-            const successfulQuizzes = results
-                .filter(r => r.status === 'fulfilled')
-                .map(r => r.value.data);
-            
-            const failedQuizzes = results
-                .filter(r => r.status === 'rejected')
-                .map(r => r.reason.message);
+            const successfulQuizzes = results.filter(r => r.status === 'fulfilled').map(r => r.value.data);
+            const failedQuizzes = results.filter(r => r.status === 'rejected').map(r => r.reason.message);
             
             allQuizData = successfulQuizzes;
             displayQuizList();
@@ -93,8 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayLoadErrors([`[quiz_list.json] ${error.message}`]);
         }
     }
-
-    /** 読み込みエラーを表示する */
     function displayLoadErrors(errors) {
         const errorListHTML = errors.map(msg => `<li>${msg.replace(/</g, "&lt;")}</li>`).join('');
         loadErrorsContainer.innerHTML = `
@@ -106,15 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button id="copy-error-btn">エラー情報をクリップボードにコピー</button>
             </div>
         `;
-
         document.getElementById('copy-error-btn').addEventListener('click', (e) => {
             const button = e.target;
             const reportText = `クイズサイトのエラー報告:\n\n${errors.join('\n')}`;
             navigator.clipboard.writeText(reportText).then(() => {
                 button.textContent = 'コピーしました！';
-                setTimeout(() => {
-                    button.textContent = 'エラー情報をクリップボードにコピー';
-                }, 2000);
+                setTimeout(() => { button.textContent = 'エラー情報をクリップボードにコピー'; }, 2000);
             }).catch(err => {
                 button.textContent = 'コピーに失敗しました';
                 console.error('クリップボードへのコピーに失敗:', err);
@@ -122,27 +115,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    /** クイズ一覧表示処理 */
     function displayQuizList() {
         quizListContainer.innerHTML = '';
         if (allQuizData.length === 0) {
             quizListContainer.innerHTML = '<p>表示できるクイズがありません。</p>';
             return;
         }
-
         const quizzesByCategory = allQuizData.reduce((acc, quiz) => {
-            // ... (以下、変更なし)
             const category = quiz.category || '未分類';
             if (!acc[category]) acc[category] = [];
             acc[category].push(quiz);
             return acc;
         }, {});
-
         Object.entries(quizzesByCategory).forEach(([category, quizzes]) => {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'quiz-category';
             categoryDiv.innerHTML = `<h3>${category}</h3>`;
-
             quizzes.forEach(quiz => {
                 const quizCard = document.createElement('div');
                 quizCard.className = 'quiz-card';
@@ -161,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /** 開始画面表示処理 */
     function showStartScreen(quizData) {
         currentQuiz = quizData;
         document.getElementById('start-quiz-title').textContent = currentQuiz.title;
@@ -169,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('start-screen');
     }
 
-    /** クイズ開始処理 */
     function startQuiz() {
         currentQuestionIndex = 0;
         score = 0;
@@ -178,16 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
         displayQuestion();
     }
 
-    /** 問題表示処理 */
     function displayQuestion() {
         selectedOptionIndex = null;
         submitAnswerBtn.textContent = '回答する';
         submitAnswerBtn.disabled = true;
-
         const question = currentQuiz.questions[currentQuestionIndex];
         questionCounterEl.textContent = `Q.${currentQuestionIndex + 1} / Q.${currentQuiz.questions.length}`;
         questionStatementEl.textContent = question.statement;
-        
         if (question.hint && question.hint.trim() !== '') {
             hintContainer.style.display = 'block';
             hintContent.textContent = question.hint;
@@ -195,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             hintContainer.style.display = 'none';
         }
-
         optionsContainer.innerHTML = '';
         question.options.forEach((option, index) => {
             const labelChar = String.fromCharCode('A'.charCodeAt(0) + index);
@@ -203,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
             optionCard.className = 'option-card';
             optionCard.dataset.index = index;
             optionCard.innerHTML = `<span class="option-label">${labelChar}.</span><span class="option-text">${option.text}</span>`;
-            
             optionCard.addEventListener('click', () => {
                 if (submitAnswerBtn.textContent !== '回答する') return;
                 optionsContainer.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
@@ -215,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /** 回答ボタン処理 */
     function handleSubmitAnswer() {
         if (submitAnswerBtn.textContent === '回答する') {
             checkAnswer();
@@ -223,8 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
             goToNextQuestion();
         }
     }
-    
-    /** 回答チェック処理 */
     function checkAnswer() {
         const question = currentQuiz.questions[currentQuestionIndex];
         const optionsCards = optionsContainer.querySelectorAll('.option-card');
@@ -244,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 自分が選んだ選択肢が、正解の選択肢のいずれかと一致すればスコア加算
         if (question.options[selectedOptionIndex].isCorrect) {
             score++;
         }
@@ -255,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitAnswerBtn.textContent = '結果を見る';
         }
     }
-    /** 次の問題へ進む処理 */
+
     function goToNextQuestion() {
         currentQuestionIndex++;
         if (currentQuestionIndex < currentQuiz.questions.length) {
@@ -265,13 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /** 結果表示処理 */
     function showResultScreen() {
         const total = currentQuiz.questions.length;
         const percentage = total > 0 ? (score / total) * 100 : 0;
-
         document.getElementById('result-summary').textContent = `${total}問中 ${score}問正解！ (正解率: ${percentage.toFixed(1)}%)`;
-        
         const resultMessageEl = document.getElementById('result-message');
         if (currentQuiz.resultMessages && currentQuiz.resultMessages.length > 0) {
             const sortedMessages = [...currentQuiz.resultMessages].sort((a, b) => b.score - a.score);
@@ -280,11 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             resultMessageEl.textContent = '';
         }
-
         showScreen('result-screen');
     }
 
-    /** テーマ（ダークモード）切り替え */
     function toggleTheme() {
         if (themeSwitch.checked) {
             document.body.classList.add('dark-mode');
@@ -295,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /** テーマの初期化 */
     function initializeTheme() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {

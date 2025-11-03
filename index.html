@@ -23,7 +23,6 @@
         <div id="list-screen" class="screen active">
             <section id="quiz-list-container">
                 <h2>クイズ一覧</h2>
-                <!-- データ読み込みエラー表示エリア -->
                 <div id="load-errors-container"></div>
                 <div id="quiz-list"><p>クイズデータを読み込んでいます...</p></div>
             </section>
@@ -34,13 +33,19 @@
             <div class="center-content">
                 <h2 id="start-quiz-title"></h2>
                 <p id="start-quiz-description"></p>
-                <button id="start-quiz-btn">クイズを始める</button>
+                <div class="action-buttons">
+                    <button id="start-back-to-list-btn" class="secondary-action">一覧に戻る</button>
+                    <button id="start-quiz-btn">クイズを始める</button>
+                </div>
             </div>
         </div>
 
         <!-- クイズプレイ画面 -->
         <div id="play-screen" class="screen">
-            <h2 id="quiz-title"></h2>
+            <div class="play-screen-header">
+                <h2 id="quiz-title"></h2>
+                <button id="play-back-to-list-btn" class="tertiary-action">中断して一覧へ</button>
+            </div>
             <p id="question-counter"></p>
             <div id="question-area">
                 <p id="question-statement"></p>

@@ -26,10 +26,8 @@ body.dark-mode {
     --border-color: #333;
     --card-bg: #1e1e1e;
     --card-shadow: 0 2px 10px rgba(0,0,0,0.2);
-
     --correct-bg: #1a331c;
     --incorrect-bg: #3c1e1e;
-    
     --header-bg: #1e1e1e;
 }
 
@@ -43,7 +41,6 @@ body {
     padding: 20px;
     transition: background-color 0.3s, color 0.3s;
 }
-
 header {
     max-width: 800px;
     margin: 0 auto 2rem auto;
@@ -55,7 +52,6 @@ header {
     justify-content: space-between;
     align-items: center;
 }
-
 main {
     max-width: 800px;
     margin: 0 auto;
@@ -64,7 +60,6 @@ main {
     border-radius: 8px;
     box-shadow: var(--card-shadow);
 }
-
 h1, h2, h3 { color: var(--text-color); }
 button {
     background-color: var(--primary-color);
@@ -78,6 +73,22 @@ button {
 }
 button:hover { opacity: 0.9; }
 button:disabled { background-color: #ccc; cursor: not-allowed; }
+button.secondary-action {
+    background-color: #e0e0e0;
+    color: #333;
+}
+button.tertiary-action {
+    background: none;
+    border: none;
+    color: var(--muted-text-color);
+    text-decoration: underline;
+    padding: 0;
+    font-size: 0.9rem;
+}
+button.tertiary-action:hover {
+    color: var(--primary-color);
+}
+
 
 /* === ダークモードスイッチ === */
 .theme-switch-wrapper { display: flex; align-items: center; }
@@ -88,39 +99,34 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 input:checked + .slider { background-color: var(--primary-color); }
 input:checked + .slider:before { transform: translateX(24px); }
 
-
 /* === 各画面コンテナ === */
-.screen { display: none; } /* 基本は非表示 */
-.screen.active { display: block; } /* 表示する画面に付けるクラス */
-
+.screen { display: none; }
+.screen.active { display: block; }
 
 /* === クイズ一覧画面 === */
-.quiz-category h3 {
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 5px;
-    margin-top: 2rem;
-}
-.quiz-card {
-    border: 1px solid var(--border-color);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+.quiz-category h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 2rem; }
+.quiz-card { border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
 .quiz-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .quiz-card h4 { margin: 0 0 10px 0; font-size: 1.2rem; }
 .quiz-meta { display: flex; gap: 20px; color: var(--muted-text-color); font-size: 0.9rem; }
-
 
 /* === 開始・結果画面の共通スタイル === */
 .center-content { text-align: center; }
 .center-content h2 { font-size: 1.8rem; }
 .center-content p { font-size: 1.1rem; margin-bottom: 2rem; }
-.action-buttons { margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; }
-
+.action-buttons { margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
 
 /* === クイズプレイ画面 === */
+.play-screen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+.play-screen-header h2 {
+    margin-top: 0;
+}
 #question-counter { color: var(--muted-text-color); font-size: 0.9rem; }
 #question-statement { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; }
 .option-card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; position: relative; }
