@@ -138,10 +138,11 @@
 
     <!-- Quiz Editor Tab -->
     <div id="quiz-editor" class="tab-content active">
-        <div style="display: flex; gap: 20px;">
-            <div style="width: 300px; border-right: 1px solid #eee; padding-right: 20px;">
+        <div style="display: flex; gap: 20px; height: 100%;">
+            <div
+                style="width: 300px; border-right: 1px solid #eee; padding-right: 20px; display: flex; flex-direction: column;">
                 <h3>クイズ一覧</h3>
-                <div id="quiz-file-list" class="file-list"></div>
+                <div id="quiz-file-list" class="file-list" style="flex: 1;"></div>
                 <button id="refresh-files-btn">更新</button>
                 <button id="create-new-quiz-btn" class="primary-action">新規作成</button>
                 <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
@@ -152,10 +153,20 @@
                     </label>
                 </div>
             </div>
-            <div style="flex: 1;">
+            <div style="flex: 1; overflow-y: auto; position: relative;">
                 <form id="quiz-form">
+                    <div class="sticky-header"
+                        style="position: sticky; top: 0; background: white; z-index: 100; padding-bottom: 10px; border-bottom: 2px solid #eee; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="margin: 0;">基本情報 <span id="current-filename"
+                                style="font-size: 0.6em; color: gray; font-weight: normal;"></span></h2>
+                        <div>
+                            <button type="button" id="delete-quiz-btn"
+                                style="background-color: #c62828; margin-right: 10px;">削除</button>
+                            <button type="button" id="save-quiz-btn" class="primary-action">保存する</button>
+                        </div>
+                    </div>
+
                     <div class="tool-section quiz-meta">
-                        <h2>基本情報 <span id="current-filename" style="font-size: 0.8em; color: gray;"></span></h2>
                         <div class="form-grid">
                             <label>タイトル:</label>
                             <input type="text" id="quiz-title" required>
@@ -164,10 +175,15 @@
                             <datalist id="category-suggestions"></datalist>
                             <label>難易度:</label>
                             <input type="text" id="quiz-difficulty">
-                            <label>説明文:</label>
-                            <textarea id="quiz-description" rows="2"></textarea>
-                            <label>詳細説明:</label>
-                            <textarea id="quiz-detailed-description" rows="4"></textarea>
+                            <label>説明文(一覧用):</label>
+                            <div>
+                                <textarea id="quiz-description" rows="2" placeholder="クイズ一覧画面に表示される短い説明"></textarea>
+                            </div>
+                            <label>詳細説明(開始用):</label>
+                            <div>
+                                <textarea id="quiz-detailed-description" rows="4"
+                                    placeholder="クイズ開始直前の画面に表示される詳細な説明文"></textarea>
+                            </div>
                         </div>
                     </div>
 
@@ -181,12 +197,6 @@
                         <h2>問題リスト (<span id="question-count">0</span>問)</h2>
                         <div id="questions-container"></div>
                         <button type="button" id="add-question-btn">問題を追加</button>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" id="delete-quiz-btn"
-                            style="background-color: #c62828; float: left;">このクイズを削除</button>
-                        <button type="button" id="save-quiz-btn" class="primary-action">保存する</button>
                     </div>
                 </form>
             </div>
@@ -250,10 +260,13 @@
 
     <template id="result-message-template">
         <div class="result-message-block">
-            正解率 <input type="number" class="result-score" min="0" max="100" style="width: 50px;"> %以上:
-            <input type="text" class="result-message" placeholder="メッセージ" style="flex: 1;">
+            <span>正解率</span>
+            <input type="number" class="result-score" min="0" max="100" style="width: 60px;">
+            <span>% (</span>
+            <input type="number" class="result-count" min="0" step="1" style="width: 60px;">
+            <span>問) 以上で:</span>
+            <input type="text" class="result-message" placeholder="メッセージ" style="flex: 1; margin-left: 10px;">
             <button type="button" class="delete-result-message-btn">×</button>
-            <input type="hidden" class="result-count"> <!-- Logic needs this? -->
         </div>
     </template>
 

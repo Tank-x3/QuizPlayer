@@ -319,19 +319,57 @@ function addOption(container, optData = {}) {
 }
 
 function addResultMessage(data = {}) {
-  const clone = resultMessageTemplate.content.cloneNode(true);
-  const block = clone.querySelector('.result-message-block');
+    const clone = resultMessageTemplate.content.cloneNode(true);
+    const block = clone.querySelector('.result-message-block');
+    
+    // Initial values
+    const scoreInput = block.querySelector('.result-score');
+    const countInput = block.querySelector('.result-count');
+    
+    scoreInput.value = data.score !== undefined ? data.score : '';
+    block.querySelector('.result-message').value = data.message || '';
+    
+    // Calculate initial count based on score (if count not provided, though data model usually has score)
+    const totalQuestions = questionsContainer.children.length || 1;
+    if (data.score !== undefined) {
+        countInput.value = Math.ceil(totalQuestions * data.score / 100);
+    }
 
-  block.querySelector('.result-score').value = data.score !== undefined ? data.score : '';
-  block.querySelector('.result-message').value = data.message || '';
+    block.querySelector('.delete-result-message-btn').addEventListener('click', () => block.remove());
+    
+    // Add Event Listeners for Sync
+    scoreInput.addEventListener('input', () => updateResultMessageFields(block, 'score'));
+    countInput.addEventListener('input', () => updateResultMessageFields(block, 'count'));
 
-  block.querySelector('.delete-result-message-btn').addEventListener('click', () => block.remove());
-  resultMessagesContainer.appendChild(clone);
+    resultMessagesContainer.appendChild(clone);
+}
+
+function updateResultMessageFields(block, changedSource) {
+    const scoreInput = block.querySelector('.result-score');
+    const countInput = block.querySelector('.result-count');
+    const totalQuestions = questionsContainer.children.length || 1;
+
+    if (changedSource === 'score') {
+        const score = parseInt(scoreInput.value, 10) || 0;
+        const count = Math.ceil(totalQuestions * score / 100);
+        countInput.value = count;
+    } else { // 'count'
+        const count = parseInt(countInput.value, 10) || 0;
+        const score = Math.floor(count / totalQuestions * 100);
+        scoreInput.value = score; // Note: legacy had logic to add questions if count > total, skipping for simplicity unless requested
+    }
+}
+
+function updateAllMessageCalculations() {
+    resultMessagesContainer.querySelectorAll('.result-message-block').forEach(block => {
+        updateResultMessageFields(block, 'score');
+    });
 }
 
 function updateQuestionCounts() {
   const count = questionsContainer.children.length;
   document.getElementById('question-count').textContent = count;
+  updateAllMessageCalculations(); // Recalculate when question count changes
 }
 
 function buildQuizObject() {
