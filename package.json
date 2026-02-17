@@ -1,0 +1,14 @@
+{
+  "name": "quiz-manager",
+  "version": "1.0.0",
+  "description": "Manager tool for Quiz App",
+  "main": "manager/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^34.1.1"
+  }
+}

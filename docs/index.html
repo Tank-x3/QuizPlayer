@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズサイト</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1>クイズサイト</h1>
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="theme-switch-checkbox">
+                <input type="checkbox" id="theme-switch-checkbox" />
+                <div class="slider"></div>
+            </label>
+        </div>
+    </header>
+
+    <main>
+        <!-- クイズ一覧画面 -->
+        <div id="list-screen" class="screen active">
+            <section id="quiz-list-container">
+                <h2>クイズ一覧</h2>
+                <div id="load-errors-container"></div>
+                <div id="quiz-list"><p>クイズデータを読み込んでいます...</p></div>
+            </section>
+        </div>
+
+        <!-- クイズ開始画面 -->
+        <div id="start-screen" class="screen">
+            <div class="center-content">
+                <h2 id="start-quiz-title"></h2>
+                <p id="start-quiz-description"></p>
+                <div class="action-buttons">
+                    <button id="start-back-to-list-btn" class="secondary-action">一覧に戻る</button>
+                    <button id="start-quiz-btn">クイズを始める</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイズプレイ画面 -->
+        <div id="play-screen" class="screen">
+            <div class="play-screen-header">
+                <h2 id="quiz-title"></h2>
+                <button id="play-back-to-list-btn" class="tertiary-action">中断して一覧へ</button>
+            </div>
+            <p id="question-counter"></p>
+            <div id="question-area">
+                <p id="question-statement"></p>
+                <div class="hint-container">
+                    <button class="hint-toggle">ヒントを見る</button>
+                    <div class="hint-content"></div>
+                </div>
+                <div id="options-container"></div>
+            </div>
+            <div id="action-button-container">
+                <button id="submit-answer-btn">回答する</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <div class="center-content">
+                <h2>クイズ結果</h2>
+                <p id="result-summary"></p>
+                <p id="result-message"></p>
+                <div class="action-buttons">
+                    <button id="retry-quiz-btn">もう一度挑戦</button>
+                    <button id="back-to-list-btn">一覧に戻る</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

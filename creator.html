@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズデータ作成ツール</title>
+    <link rel="stylesheet" href="css/creator.css">
+</head>
+<body>
+    <header>
+        <h1>クイズデータ作成ツール</h1>
+    </header>
+    <main>
+        <div class="tool-section file-operations">
+            <button id="new-quiz-btn">新規作成</button>
+            <label class="file-label">
+                ファイルから読み込む
+                <input type="file" id="load-json-file" accept=".json" style="display: none;">
+            </label>
+            <button id="save-json-btn" class="primary-action">JSON形式で保存</button>
+        </div>
+
+        <form id="quiz-form">
+            <div class="tool-section quiz-meta">
+                <h2>クイズの基本情報</h2>
+                <div class="form-grid">
+                    <label for="quiz-title">タイトル:</label>
+                    <input type="text" id="quiz-title" required>
+                    <label for="quiz-category">カテゴリ:</label>
+                    <input type="text" id="quiz-category" required>
+                    <label for="quiz-difficulty">難易度:</label>
+                    <input type="text" id="quiz-difficulty">
+                    <label for="quiz-description">説明文(一覧用):</label>
+                    <textarea id="quiz-description" rows="2"></textarea>
+                    <label for="quiz-detailed-description">詳細説明文(開始画面用):</label>
+                    <textarea id="quiz-detailed-description" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="tool-section result-messages">
+                <h2>結果画面のメッセージ</h2>
+                <div id="result-messages-container">
+                    <!-- 結果メッセージ入力欄がここに追加されます -->
+                </div>
+                <button type="button" id="add-result-message-btn">メッセージ基準を追加</button>
+            </div>
+
+            <div class="tool-section questions">
+                <h2>問題リスト</h2>
+                <div id="questions-container">
+                    <!-- 問題入力フォームがここに追加されます -->
+                </div>
+                <button type="button" id="add-question-btn">問題を追加</button>
+            </div>
+        </form>
+    </main>
+
+    <!-- 問題フォームのテンプレート -->
+    <template id="question-template">
+        <div class="question-block">
+            <div class="question-header">
+                <h3 class="question-title">問題</h3>
+                <button type="button" class="delete-question-btn">この問題を削除</button>
+            </div>
+            <div class="form-grid">
+                <label>問題文:</label>
+                <textarea class="question-statement" rows="3" required></textarea>
+                <label>ヒント(任意):</label>
+                <input type="text" class="question-hint">
+            </div>
+            <h4>選択肢</h4>
+            <div class="options-container">
+                <!-- 選択肢フォームがここに追加されます -->
+            </div>
+            <button type="button" class="add-option-btn">選択肢を追加</button>
+        </div>
+    </template>
+
+    <!-- 選択肢フォームのテンプレート -->
+    <template id="option-template">
+        <div class="option-block">
+            <input type="checkbox" class="correct-option-checkbox" title="この選択肢を正解に設定">
+            <input type="text" class="option-text" placeholder="選択肢のテキスト" required>
+            <textarea class="option-explanation" placeholder="この選択肢の解説文" rows="3" required></textarea>
+            <button type="button" class="delete-option-btn">×</button>
+        </div>
+    </template>
+
+    <!-- 結果メッセージフォームのテンプレート -->
+    <template id="result-message-template">
+        <div class="result-message-block">
+            <span>正解率が</span>
+            <input type="number" class="result-score" min="0" max="100" step="1" placeholder="例: 80" required>
+            <span>% 以上で、メッセージ:</span>
+            <input type="text" class="result-message" placeholder="例: おめでとう！" required>
+            <button type="button" class="delete-result-message-btn">×</button>
+        </div>
+    </template>
+
+    <script src="js/creator.js"></script>
+</body>
+</html>

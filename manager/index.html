@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App Manager</title>
+    <link rel="stylesheet" href="css/creator.css">
+    <style>
+        /* Custom styles for Manager */
+        body {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .tabs {
+            display: flex;
+            background: #333;
+            color: white;
+        }
+
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: #4a90e2;
+            background: #444;
+        }
+
+        .tab:hover {
+            background: #555;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .file-list {
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .file-list-item {
+            padding: 5px 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-list-item:hover {
+            background: #f0f0f0;
+        }
+
+        .file-list-item.selected {
+            background: #e0eaff;
+        }
+
+        .form-actions {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+
+        /* Category Manager Styles */
+        #category-list {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 20px 0;
+        }
+
+        #category-list li {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #category-list li.dragging {
+            opacity: 0.5;
+        }
+
+        /* Integrity Checker Styles */
+        .check-result {
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .check-result.ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .check-result.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .check-result.warning {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tabs">
+        <div class="tab active" data-tab="quiz-editor">クイズ編集</div>
+        <div class="tab" data-tab="category-manager">カテゴリ管理</div>
+        <div class="tab" data-tab="integrity-checker">整合性チェック</div>
+    </div>
+
+    <!-- Quiz Editor Tab -->
+    <div id="quiz-editor" class="tab-content active">
+        <div style="display: flex; gap: 20px;">
+            <div style="width: 300px; border-right: 1px solid #eee; padding-right: 20px;">
+                <h3>クイズ一覧</h3>
+                <div id="quiz-file-list" class="file-list"></div>
+                <button id="refresh-files-btn">更新</button>
+                <button id="create-new-quiz-btn" class="primary-action">新規作成</button>
+                <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                    <label class="file-label"
+                        style="cursor: pointer; background: #eee; padding: 5px 10px; border-radius: 4px; display: inline-block;">
+                        📁 外部JSONを読込
+                        <input type="file" id="import-json-file" accept=".json" style="display: none;">
+                    </label>
+                </div>
+            </div>
+            <div style="flex: 1;">
+                <form id="quiz-form">
+                    <div class="tool-section quiz-meta">
+                        <h2>基本情報 <span id="current-filename" style="font-size: 0.8em; color: gray;"></span></h2>
+                        <div class="form-grid">
+                            <label>タイトル:</label>
+                            <input type="text" id="quiz-title" required>
+                            <label>カテゴリ:</label>
+                            <input type="text" id="quiz-category" list="category-suggestions" required>
+                            <datalist id="category-suggestions"></datalist>
+                            <label>難易度:</label>
+                            <input type="text" id="quiz-difficulty">
+                            <label>説明文:</label>
+                            <textarea id="quiz-description" rows="2"></textarea>
+                            <label>詳細説明:</label>
+                            <textarea id="quiz-detailed-description" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="tool-section result-messages">
+                        <h2>結果メッセージ</h2>
+                        <div id="result-messages-container"></div>
+                        <button type="button" id="add-result-message-btn">追加</button>
+                    </div>
+
+                    <div class="tool-section questions">
+                        <h2>問題リスト (<span id="question-count">0</span>問)</h2>
+                        <div id="questions-container"></div>
+                        <button type="button" id="add-question-btn">問題を追加</button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="delete-quiz-btn"
+                            style="background-color: #c62828; float: left;">このクイズを削除</button>
+                        <button type="button" id="save-quiz-btn" class="primary-action">保存する</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Manager Tab -->
+    <div id="category-manager" class="tab-content">
+        <h2>カテゴリ並び替え</h2>
+        <p>ドラッグ&ドロップで並び替え、またはボタンを使用してください。</p>
+        <ul id="category-list"></ul>
+        <div style="margin-top: 10px;">
+            <input type="text" id="new-category-input" placeholder="新しいカテゴリ名">
+            <button id="add-category-btn">追加</button>
+        </div>
+        <div class="form-actions">
+            <button id="save-categories-btn" class="primary-action">順序を保存</button>
+        </div>
+    </div>
+
+    <!-- Integrity Checker Tab -->
+    <div id="integrity-checker" class="tab-content">
+        <h2>整合性チェック</h2>
+        <button id="run-check-btn">チェック実行</button>
+        <div id="check-results" style="margin-top: 20px;"></div>
+
+        <div id="auto-fix-area" style="display: none; margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;">
+            <h3>自動修復</h3>
+            <p>ファイルシステム上のJSONファイルに基づいて <code>quiz_list.json</code> を再生成します。</p>
+            <button id="fix-quiz-list-btn">quiz_list.jsonを更新</button>
+        </div>
+    </div>
+
+    <!-- Templates (Same as creator.html but adapted) -->
+    <template id="question-template">
+        <div class="question-block">
+            <div class="question-header">
+                <h3 class="question-title">問題</h3>
+                <button type="button" class="delete-question-btn">削除</button>
+            </div>
+            <div class="form-grid">
+                <label>問題文:</label>
+                <textarea class="question-statement" rows="3" required></textarea>
+                <label>ヒント:</label>
+                <input type="text" class="question-hint">
+            </div>
+            <h4>選択肢</h4>
+            <div class="options-container"></div>
+            <button type="button" class="add-option-btn">選択肢を追加</button>
+        </div>
+    </template>
+
+    <template id="option-template">
+        <div class="option-block">
+            <input type="checkbox" class="correct-option-checkbox" title="正解">
+            <input type="text" class="option-text" placeholder="選択肢" required>
+            <textarea class="option-explanation" placeholder="解説" rows="2" required></textarea>
+            <button type="button" class="delete-option-btn">×</button>
+        </div>
+    </template>
+
+    <template id="result-message-template">
+        <div class="result-message-block">
+            正解率 <input type="number" class="result-score" min="0" max="100" style="width: 50px;"> %以上:
+            <input type="text" class="result-message" placeholder="メッセージ" style="flex: 1;">
+            <button type="button" class="delete-result-message-btn">×</button>
+            <input type="hidden" class="result-count"> <!-- Logic needs this? -->
+        </div>
+    </template>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>
