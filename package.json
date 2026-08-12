@@ -4,7 +4,8 @@
   "description": "Manager tool for Quiz App",
   "main": "manager/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "publish": "node scripts/publish.js"
   },
   "author": "",
   "license": "ISC",
